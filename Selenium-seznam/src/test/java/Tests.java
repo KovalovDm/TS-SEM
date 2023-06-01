@@ -13,6 +13,7 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -32,35 +33,12 @@ public class Tests {
         //go to https://www.seznam.cz/
         driver.get("https://www.seznam.cz/");
 
-        //проверить, высвечивается ли окно с куками, если да - нажать souhlas
         try {
             Thread.sleep(4000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-
-
-//        WebElement iframeElement = driver.findElement(By.cssSelector("div > div > iframe"));
-//        driver.switchTo().frame(iframeElement);
-
-
-        //?????????????
-//        driver.findElement(By.cssSelector("#www-seznam-cz > div.szn-cmp-dialog-container"));
-//        driver.findElement(By.cssSelector("div"));
-//        driver.findElement(By.cssSelector("div > div"));
-//        try {
-//            Thread.sleep(3000);
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
-
-        //desiredElement.click();
-//        driver.findElement(By.cssSelector("div > div > div.scmp-scrollable"));
-//        driver.findElement(By.cssSelector("div > div > div.scmp-footer"));
-
-        //ТУТ
-        //найти и нажать на кнопку Přihlásit
         driver.findElement(By.linkText("Přihlásit")).click();
 
         try {
@@ -69,30 +47,23 @@ public class Tests {
             throw new RuntimeException(e);
         }
 
-        //переключиться на другое окно - !!!!!!!!!!!!
         Set<String> windowHandles = driver.getWindowHandles();
         String mainWindowHandle = driver.getWindowHandle();
         for (String windowHandle : windowHandles) {
             if (!windowHandle.equals(mainWindowHandle)) {
                 driver.switchTo().window(windowHandle);
-                // Проверьте содержимое всплывающего окна и выполните необходимые действия
-                break; // Если нашли нужное окно, можно прервать цикл
+                break;
             }
         }
 
-        //ввести в поле логин значение
         driver.findElement(By.id("login-username")).sendKeys("dmytro.kovalov");
 
-        //нажать кнопку continue
         driver.findElement(By.xpath("/html/body/main/section[1]/form[1]/button[1]")).click();
 
-        //ввести пароль
         driver.findElement(By.id("login-password")).sendKeys("TS1-kovaldmy");
 
-        //нажать кнопку continue
         driver.findElement(By.xpath("/html/body/main/section[1]/form[1]/button[1]")).click();
 
-        //вернуться на главное меню
         driver.switchTo().window(mainWindowHandle);
     }
 
@@ -119,7 +90,7 @@ public class Tests {
         driver.quit();
     }
 
-    //2 - jízdní řády test - done
+    //2 - jízdní řády test
     @Test
     public void drivingLinesTest() {
         //expected result
@@ -214,7 +185,7 @@ public class Tests {
         driver.quit();
     }
 
-    //3 - horoskopy test - done
+    //3 - horoskopy test
     @Test
     public void horoscopesTest() {
         //expected result
@@ -258,7 +229,7 @@ public class Tests {
         driver.quit();
     }
 
-    //4 - zboží test - done
+    //4 - zboží test
     @Test
     public void goodsTest() {
         //expected result
@@ -325,7 +296,7 @@ public class Tests {
         driver.quit();
     }
 
-    //5 - registrace test - done (кроме souhlasim)
+    //5 - registrace test
     @ParameterizedTest
     @CsvSource(
             {"testingmail12345@seznam.com, my_testing_password123, my_testing_password123, 1995",
@@ -335,6 +306,7 @@ public class Tests {
         boolean isCorrectInputs = false;
 
         WebDriverWait wait = new WebDriverWait(driver, 10);
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 
         //go to https://www.seznam.cz/
         driver.get("https://www.seznam.cz/");
@@ -349,8 +321,7 @@ public class Tests {
         driver.findElement(By.cssSelector("#boxik-184 > div > div > div.gadget__content > div > a.link.font-14.line-height-20.text-center")).click();
 
         //choose "new seznam account"
-        WebElement newSeznamAccountButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#register > form.intro > button.official")));
-        newSeznamAccountButton.click();
+        driver.findElement(By.cssSelector("#register > form.intro > button.official")).click();
 
         //input email
         WebElement emailInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#register-username")));
@@ -372,28 +343,11 @@ public class Tests {
         //click continue
         driver.findElement(By.cssSelector("#register > form.main > button")).click();
 
-        //wait for the past form to disappear
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("/html/body/main/section[3]/form[2]/label[2]/input")));
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
 
         //if a new form is shown inputs are valid
-        if (driver.findElement(By.xpath("/html/body/main/section[3]/form[3]")).isDisplayed()) {
-            System.out.println("norm1");
-            isCorrectInputs = true;
-        }
-
-        if (driver.findElement(By.cssSelector("#register > form.phone")).isDisplayed()) {
-            System.out.println("norm2");
-            isCorrectInputs = true;
-        }
-
-        if (driver.findElement(By.cssSelector("#register > form.phone > label.magic.phone.errorable")).isDisplayed()) {
-            System.out.println("norm3");
+        if (driver.findElement(By.xpath("/html/body/main/section[3]/form[3]")).isDisplayed() ||
+                driver.findElement(By.cssSelector("#register > form.phone")).isDisplayed() ||
+                driver.findElement(By.cssSelector("#register > form.phone > label.magic.phone.errorable")).isDisplayed()) {
             isCorrectInputs = true;
         }
 
